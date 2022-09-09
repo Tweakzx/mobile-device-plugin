@@ -1,0 +1,26 @@
+IMAGE_VERSION = latest
+REGISTRY = docker.io/lzx-cn
+IMAGE = ${REGISTRY}/mobile-device-plugin:${IMAGE_VERSION}
+
+.PHONY: build deploy
+
+build:
+	CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o build/mobile cmd/server/app.go
+
+buildImage:
+	docker build -t ${IMAGE} .
+
+kindLoad:
+	kind load docker-image ${IMAGE}
+
+pushImage:
+	docker push ${IMAGE}
+
+deploy:
+	helm install mobile deploy/helm/mobile
+
+upgrade:
+	helm upgrade mobile deploy/helm/mobile
+
+dry-run:
+	helm install mobile deploy/helm/mobile --dry-run
